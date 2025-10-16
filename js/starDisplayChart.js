@@ -16,6 +16,7 @@ constructor(parentElement, data) {
     this.parentElement = parentElement;
     this.data = data;
     this.displayData = [];
+	this.get_pos();
 }
 
 	/*
@@ -42,20 +43,20 @@ constructor(parentElement, data) {
 		// to work with
 		vis.x = d3.scaleLinear()
 			.range([0, vis.width])
-			.domain([-d3.max(vis.data, function(d)	{
-						return d.dist;
+			.domain([d3.min(vis.data, function(d)	{
+						return d.x_pos;
 					}),
 					d3.max(vis.data, function(d)	{
-						return d.dist;
+						return d.x_pos;
 					})]);
 
 		vis.y = d3.scaleLinear()
 			.range([0, vis.height])
-			.domain([-d3.max(vis.data, function(d)	{
-						return d.dist;
+			.domain([d3.min(vis.data, function(d)	{
+						return d.y_pos;
 					}),
 					d3.max(vis.data, function(d)	{
-						return d.dist;
+						return d.y_pos;
 					})]);
 
 		vis.r = d3.scaleLinear()
@@ -89,16 +90,36 @@ constructor(parentElement, data) {
 
 		circles
 			.attr("cx", function(d) {
-				return vis.x(d.dist); 
+				return vis.x(d.x_pos); 
 			})
 			.attr("cy", function(d) {
-				return 0; 
+				return vis.y(d.y_pos); 
 			})
 			.attr("r", function(d) {
-				console.log(vis.r(d.dist))
 				return vis.r(d.rad)
 			})
 		
+	}
+
+	get_pos()	{
+		// For each data point, defines their position on the chart using an offset
+		for (let i = 0; i < this.data.length; i++)	{
+
+			// Randomly determining x and y positions while keeping distance from center
+			// TODO: seeding, for now any filters should just apply on the base data, never change it though
+			let curr_offset = Math.random() * this.data[i].dist * -1;
+			let reflect = Math.random();
+			this.data[i].x_pos = this.data[i].dist + curr_offset
+
+			if (reflect < 0.5)	{
+				curr_offset *= -1
+			}	
+			this.data[i].y_pos = curr_offset
+		}
+	}
+
+	get_colour()	{
+
 	}
 
 	/*
