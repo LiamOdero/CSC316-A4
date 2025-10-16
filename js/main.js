@@ -29,13 +29,16 @@ function loadData() {
 function prepareData(data){
 	data_cleansed = [];
 	data.forEach(e => {
-		data_cleansed.push({name: e.Name, 
-							dist: +e["Distance (ly)"], 
-							lum: +e["Luminosity (L/Lo)"] * SUN_LUMINOSITY, 
-							rad: +e["Radius (R/Ro)"] * RADIUS_EARTH,
-							temp: +e["Temperature (K)"],
-							specClass: e["Spectral Class"]})
+		data_cleansed.push({name: e.Source, 
+							dist: +e.Dist, 
+							lum: (e["Lum-Flame"]) ? + e["Lum-Flame"] * SUN_LUMINOSITY : NaN, 
+							rad: +e.Rad * RADIUS_EARTH,
+							temp: +e.Teff})
 	});
+
+	data_cleansed.sort(function(a, b)	{
+		return b.dist - a.dist;
+	})
 	console.log(data_cleansed)
 	return data
 }
