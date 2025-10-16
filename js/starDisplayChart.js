@@ -110,14 +110,16 @@ constructor(parentElement, data) {
 
 			// Randomly determining x and y positions while keeping distance from center
 			// TODO: seeding, for now any filters should just apply on the base data, never change it though
-			let curr_offset = Math.random() * this.data[i].dist * -1;
-			let reflect = Math.random();
-			this.data[i].x_pos = this.data[i].dist + curr_offset
 
+			let x_proportion = Math.random()
+			this.data[i].x_pos = x_proportion * this.data[i].dist * -1;
+			let reflect = Math.random();
+
+
+			this.data[i].y_pos = Math.sqrt(this.data[i].dist ** 2 - this.data[i].x_pos ** 2)
 			if (reflect < 0.5)	{
-				curr_offset *= -1
+				this.data[i].y_pos *= -1
 			}	
-			this.data[i].y_pos = curr_offset
 		}
 	}
 
