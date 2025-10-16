@@ -17,6 +17,14 @@ constructor(parentElement, data) {
     this.data = data;
     this.displayData = [];
 	this.get_pos();
+
+	this.colours = ["#FF2400", "#FFFFFF", "#0000FF"]
+
+	// Scale defined via http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html 
+	this.colorScale = d3.scaleDiverging(d3.interpolateRdBu)
+        .domain([3000, 40000])
+		.clamp(true);
+
 }
 
 	/*
@@ -43,44 +51,31 @@ constructor(parentElement, data) {
 		// to work with
 		vis.x = d3.scaleLinear()
 			.range([0, vis.width])
-			.domain([d3.min(vis.data, function(d)	{
-						return d.x_pos;
-					}),
-					d3.max(vis.data, function(d)	{
-						return d.x_pos;
-					})]);
+			.domain(d3.extent(vis.data, d => d.x_pos));
 
 		vis.y = d3.scaleLinear()
-			.range([0, vis.height])
-			.domain([d3.min(vis.data, function(d)	{
-						return d.y_pos;
-					}),
-					d3.max(vis.data, function(d)	{
-						return d.y_pos;
-					})]);
+			.range([vis.height, 0])
+			.domain(d3.extent(vis.data, d => d.y_pos));
 
 		vis.r = d3.scaleLinear()
 			.range([0, vis.width / 100])
-			.domain([d3.min(vis.data, function(d)	{
-					return d.rad;
-					}),
-					d3.max(vis.data, function(d)	{
-						return d.rad;
-					})]);
+			.domain(d3.extent(vis.data, d => d.rad));
 
 		vis.xAxis = d3.axisBottom()
-			.scale(vis.x);
+			.scale(vis.x)
+			.ticks(2);
 
 		vis.yAxis = d3.axisLeft()
-			.scale(vis.y);
+			.scale(vis.y)
+			.ticks(2);
 
 		vis.svg.append("g")
 			.attr("class", "x-axis axis")
-			.attr("transform", "translate(0," + vis.height + ")");
+			.attr("transform", "translate(0," + vis.y(0) + ")");
 
 		vis.svg.append("g")
-			.attr("class", "y-axis axis");
-			
+			.attr("class", "y-axis axis")
+			.attr("transform", "translate("+ vis.x(0)  + ", 0)");
         vis.wrangleData();
 		
 		let circles = vis.svg.selectAll("circle")
@@ -97,6 +92,14 @@ constructor(parentElement, data) {
 			})
 			.attr("r", function(d) {
 				return vis.r(d.rad)
+			})
+			.attr("fill", function(d) {
+				if (d.temp > 10000)	{
+					return "#0000FF"
+				}	else	{
+					return vis.colorScale(d.temp)
+				}
+				
 			})
 		
 	}
@@ -146,5 +149,7 @@ constructor(parentElement, data) {
  	*/
 	updateVis(){
 		let vis = this;
+		vis.svg.select(".x-axis").call(vis.xAxis);
+		vis.svg.select(".y-axis").call(vis.yAxis);
 	}
 }
