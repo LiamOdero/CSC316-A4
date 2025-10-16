@@ -12,11 +12,12 @@ loadData();
 function loadData() {
     d3.csv("data/star_dataset.csv"). then(data=>{
             
-        data = prepareData(data)
+        data_cleaned = prepareData(data)
         
+		console.log(data_cleaned)
         console.log('data loaded ')
 
-		areachart = new StarDisplayChart("stacked-area-chart", data);
+		areachart = new StarDisplayChart("stacked-area-chart", data_cleaned);
 
 		areachart.initVis();
 
@@ -39,8 +40,14 @@ function prepareData(data){
 	data_cleansed.sort(function(a, b)	{
 		return b.dist - a.dist;
 	})
-	console.log(data_cleansed)
-	return data
+
+	for (let i = 0; i < data_cleansed.length; i++)	{
+		if (i % 2 == 1)	{
+			data_cleansed[i].dist *= -1
+		}
+	}
+
+	return data_cleansed
 }
 
 function brushed() {
