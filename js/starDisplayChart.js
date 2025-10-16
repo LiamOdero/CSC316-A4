@@ -16,23 +16,7 @@ constructor(parentElement, data) {
     this.parentElement = parentElement;
     this.data = data;
     this.displayData = [];
-
-    let colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a'];
-
-    // grab all the keys from the key value pairs in data (filter out 'year' ) to get a list of categories
-    this.dataCategories = Object.keys(this.data[0]).filter(d=>d !== "Year")
-
-    // prepare colors for range
-    let colorArray = this.dataCategories.map( (d,i) => {
-        return colors[i%10]
-    })
-
-    // Set ordinal color scale
-    this.colorScale = d3.scaleOrdinal()
-        .domain(this.dataCategories)
-        .range(colorArray);
 }
-
 
 	/*
 	 * Method that initializes the visualization (static content, e.g. SVG area or axes)
@@ -51,8 +35,70 @@ constructor(parentElement, data) {
 			.attr("height", vis.height + vis.margin.top + vis.margin.bottom)
 			.append("g")
 			.attr("transform", "translate(" + vis.margin.left + "," + vis.margin.top + ")");
+
+		// Scales and axes
+
+		// Since distance is just relative to earth, we can arbitrarily set some stars to -dist to increase the effective space we have
+		// to work with
+		vis.x = d3.scaleLinear()
+			.range([0, vis.width])
+			.domain([-d3.max(vis.data, function(d)	{
+						return d.dist;
+					}),
+					d3.max(vis.data, function(d)	{
+						return d.dist;
+					})]);
+
+		vis.y = d3.scaleLinear()
+			.range([0, vis.height])
+			.domain([-d3.max(vis.data, function(d)	{
+						return d.dist;
+					}),
+					d3.max(vis.data, function(d)	{
+						return d.dist;
+					})]);
+
+		vis.r = d3.scaleLinear()
+			.range([0, vis.width / 100])
+			.domain([d3.min(vis.data, function(d)	{
+					return d.rad;
+					}),
+					d3.max(vis.data, function(d)	{
+						return d.rad;
+					})]);
+
+		vis.xAxis = d3.axisBottom()
+			.scale(vis.x);
+
+		vis.yAxis = d3.axisLeft()
+			.scale(vis.y);
+
+		vis.svg.append("g")
+			.attr("class", "x-axis axis")
+			.attr("transform", "translate(0," + vis.height + ")");
+
+		vis.svg.append("g")
+			.attr("class", "y-axis axis");
 			
-         vis.wrangleData();
+        vis.wrangleData();
+		
+		let circles = vis.svg.selectAll("circle")
+			.data(vis.data)
+			.enter()
+			.append("circle");      
+
+		circles
+			.attr("cx", function(d) {
+				return vis.x(d.dist); 
+			})
+			.attr("cy", function(d) {
+				return 0; 
+			})
+			.attr("r", function(d) {
+				console.log(vis.r(d.dist))
+				return vis.r(d.rad)
+			})
+		
 	}
 
 	/*
@@ -64,6 +110,13 @@ constructor(parentElement, data) {
         //vis.displayData = ....;
 
 		vis.updateVis();
+	}
+
+	/**
+	 * Filters the displayed data
+	 */
+	filterDisplay()	{
+		this.updateVis()
 	}
 
 	/*
