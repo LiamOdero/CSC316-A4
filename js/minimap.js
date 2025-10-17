@@ -23,7 +23,7 @@ class Minimap {
 		// store keyword this which refers to the object it belongs to in variable vis
 		let vis = this;
 
-		vis.margin = {top: 0, right: 40, bottom: 30, left: 40};
+		vis.margin = {top: 10, right: 40, bottom: 30, left: 40};
 
 		vis.width = document.getElementById(vis._parentElement).getBoundingClientRect().width - vis.margin.left - vis.margin.right;
 		vis.height = document.getElementById(vis._parentElement).getBoundingClientRect().height  - vis.margin.top - vis.margin.bottom;
@@ -58,14 +58,10 @@ class Minimap {
 			.attr("cx", d => vis.x(d.x_pos))
 			.attr("cy", d => vis.y(d.y_pos))
 			.attr("r", d => vis.r(d.rad))
-			.attr("fill", d => {
-				if (d.temp > 10000) {
-					return "#0000FF";
-				} else {
-					return vis._mainChart.colorScale(d.temp);
-				}
+			.attr("fill", function(d) {
+				return vis.colorScale(d.temp)	
 			})
-			.attr("opacity", 0.6);
+			.attr("opacity", 1);
 
 		vis.brush = d3.brush()
 			.extent([[0, 0], [vis.width, vis.height]])

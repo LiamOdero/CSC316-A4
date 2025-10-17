@@ -20,7 +20,7 @@ function loadData() {
 		areachart = new StarDisplayChart("stacked-area-chart", data_cleaned);
 
 		areachart.initVis();
-
+		
 		minimap = new Minimap("timeline", data.years, areachart)
 		minimap.initVis();
     });

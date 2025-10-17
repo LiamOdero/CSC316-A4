@@ -62,24 +62,41 @@ constructor(parentElement, data) {
 			.domain(d3.extent(vis.data, d => d.y_pos));
 
 		vis.r = d3.scaleLinear()
-			.range([0, vis.width / 100])
+			.range([0, vis.width / 90])
 			.domain(d3.extent(vis.data, d => d.rad));
 
 		vis.xAxis = d3.axisBottom()
 			.scale(vis.x)
-			.ticks(2);
+			.ticks(3)
 
 		vis.yAxis = d3.axisLeft()
 			.scale(vis.y)
-			.ticks(2);
+			.ticks(3);
 
-		vis.svg.append("g")
+		let xAxisGroup = vis.svg.append("g")
 			.attr("class", "x-axis axis")
 			.attr("transform", "translate(0," + vis.y(0) + ")");
 
-		vis.svg.append("g")
+		xAxisGroup.append("text")    
+						   .attr("class", "axis-title")
+						   .attr("text-anchor", "middle")
+						   .attr("fill", "white")
+						   .text("Distance from Earth (Light Years)")
+						   .attr("transform", "translate(50, -10)")
+						   .attr("opacity", 0.5);
+
+		let yAxisGroup = vis.svg.append("g")
 			.attr("class", "y-axis axis")
 			.attr("transform", "translate("+ vis.x(0)  + ", 0)");
+
+		yAxisGroup.append("text")    
+						   .attr("class", "axis-title")
+						   .attr("text-anchor", "middle")
+						   .attr("fill", "white")
+						   .text("Distance from Earth (Light Years)")
+						   .attr("transform", "translate(0, -10)")
+						   .attr("opacity", 0.5);
+
         vis.wrangleData();
 		
 		let circles = vis.svg.selectAll("circle")
@@ -98,12 +115,7 @@ constructor(parentElement, data) {
 				return vis.r(d.rad)
 			})
 			.attr("fill", function(d) {
-				if (d.temp > 10000)	{
-					return "#0000FF"
-				}	else	{
-					return vis.colorScale(d.temp)
-				}
-				
+				return vis.colorScale(d.temp)	
 			})
 			.on("mouseenter", (event, d) => {
 				showTooltip(vis.getTooltipContent(d), event);
