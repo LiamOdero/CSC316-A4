@@ -21,7 +21,7 @@ function loadData() {
 
 		areachart.initVis();
 
-		minimap = new Minimap("timeline", data.years)
+		minimap = new Minimap("timeline", data.years, areachart)
 		minimap.initVis();
     });
 

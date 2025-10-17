@@ -38,6 +38,10 @@ constructor(parentElement, data) {
 		vis.width = document.getElementById(vis.parentElement).getBoundingClientRect().width - vis.margin.left - vis.margin.right;
 		vis.height = document.getElementById(vis.parentElement).getBoundingClientRect().height - vis.margin.top - vis.margin.bottom;
 
+		// Store original domain for reset
+		vis.originalXDomain = d3.extent(vis.data, d => d.x_pos);
+		vis.originalYDomain = d3.extent(vis.data, d => d.y_pos);
+
 		// SVG drawing area
 		vis.svg = d3.select("#" + vis.parentElement).append("svg")
 			.attr("width", vis.width + vis.margin.left + vis.margin.right)
@@ -143,6 +147,35 @@ constructor(parentElement, data) {
 	 */
 	filterDisplay()	{
 		this.updateVis()
+	}
+
+	/**
+	 * Update the chart domain based on brush selection
+	 */
+	updateDomain(xDomain, yDomain) {
+		let vis = this;
+		
+		// scales are updated to the new domain
+		vis.x.domain(xDomain);
+		vis.y.domain(yDomain);
+		
+		
+		vis.svg.selectAll("circle")
+			.transition() // added transition so the circles move whenever the brush changes
+			.duration(750)
+			.attr("cx", d => vis.x(d.x_pos))
+			.attr("cy", d => vis.y(d.y_pos));
+		
+		// axis update
+		vis.updateVis();
+	}
+
+	/**
+	 * Reset to original view
+	 */
+	resetDomain() {
+		let vis = this;
+		vis.updateDomain(vis.originalXDomain, vis.originalYDomain);
 	}
 
 	/*
