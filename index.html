@@ -25,21 +25,37 @@
 </div>
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-8 offset-2"
-             style="margin-top: 5vh; background: rgba(20, 20, 26,0.75)">
+  <div class="row justify-content-center g-5">
 
-            <!-- graph -->
-            <div class="row justify-content-center" style="height: 60vh">
-                <div class="align-self-center" id="stacked-area-chart" style="height: 100%; width: 100%; border: thin solid rgb(49, 49, 49); border-radius: 5px;"></div>
-            </div>
+    <!-- main chart area -->
+    <div class="col-md-8"
+         style="margin-top: 5vh;">
+         
+        <!-- graph -->
+        <div class="row justify-content-center" style="height: 60vh">
+            <div class="align-self-center" id="stacked-area-chart" style="height: 100%; width: 100%; background: rgba(20, 20, 26,0.75); border: thin solid rgb(49, 49, 49); border-radius: 5px;"></div>
+        </div>
 
-            <!-- brush -->
-            <div class="row justify-content-center" style="height: 15vh;  background: rgba(20, 20, 26,0.75)">
-                <div class="align-self-center" id="timeline" style="height: 100%; width: 100%; border: thin solid rgb(49, 49, 49); border-radius: 5px;"></div>
-            </div>
+        <!-- brush -->
+        <div class="row justify-content-center" style="height: 15vh; background: rgba(20, 20, 26,0.75)">
+            <div class="align-self-center" id="timeline" style="height: 100%; width: 100%; border: thin solid rgb(49, 49, 49); border-radius: 5px;"></div>
         </div>
     </div>
+
+    <div class="col-md-2" style="margin-top: 5vh; background: rgba(20, 20, 26,0.75); border: thin solid rgb(49, 49, 49); border-radius: 5px;">
+        <div class="row justify-content-center">
+            <h2 style="color: #FFF; border: thin solid rgb(49, 49, 49); border-radius: 5px;">Click on a Star to compare to Earth</h2>
+            <div class="align-self-center" id="star-comparison" style="height: 100%; width: 100%;"></div>
+        </div>
+
+        <div class="row justify-content-center">
+            <h2 style="color: #FFF; border: thin solid rgb(49, 49, 49); border-radius: 5px;">Filters:</h2>
+            <div class="align-self-center" id="filters" style="height: 100%; width: 100%;"></div>
+        </div>
+        
+    </div>
+
+  </div>
 </div>
 
 <!-- Load JS libraries -->
