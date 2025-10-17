@@ -18,11 +18,12 @@ constructor(parentElement, data) {
     this.displayData =data;
 	this.get_pos();
 
-	this.colours = ["#FF2400", "#FFFFFF", "#0000FF"]
+	this.colours = ["#ff3300", "#ffa148", "#fff9fb", "#c8d5ff", "#9bbcff"]
 
 	// Scale defined via http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html 
-	this.colorScale = d3.scaleDiverging(d3.interpolateRdBu)
-        .domain([3000, 40000])
+	this.colorScale = d3.scaleDiverging()
+        .domain([1000, 2500, 6500, 11000, 40000])
+		.range(this.colours)
 		.clamp(true);
 
 }
