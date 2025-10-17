@@ -101,6 +101,21 @@ constructor(parentElement, data) {
 				}
 				
 			})
+			.on("mouseenter", (event, d) => {
+				showTooltip(vis.getTooltipContent(d), event);
+				d3.select(event.currentTarget)
+					.attr("stroke", "#ffffff")
+					.attr("stroke-width", 1.5);
+			})
+			.on("mousemove", (event) => {
+				moveTooltip(event);
+			})
+			.on("mouseleave", (event) => {
+				hideTooltip();
+				d3.select(event.currentTarget)
+					.attr("stroke", null)
+					.attr("stroke-width", null);
+			});
 		
 	}
 
@@ -125,6 +140,25 @@ constructor(parentElement, data) {
 
 	get_colour()	{
 
+	}
+
+	getTooltipContent(d) {
+		const formatInteger = d3.format(",.0f");
+		const formatSI = d3.format(".2s");
+
+		const name = d.name || "Unknown star";
+		const distance = Number.isFinite(d.dist) ? `${Math.abs(d.dist).toFixed(2)} ly` : "Unknown";
+		const radius = Number.isFinite(d.rad) ? `${formatSI(d.rad)} km` : "Unknown";
+		const temperature = Number.isFinite(d.temp) ? `${formatInteger(d.temp)} K` : "Unknown";
+		const luminosity = Number.isFinite(d.lum) ? `${formatSI(d.lum)} W` : "Unknown";
+
+		return `
+			<div><strong>${name}</strong></div>
+			<div>Distance: ${distance}</div>
+			<div>Radius: ${radius}</div>
+			<div>Temperature: ${temperature}</div>
+			<div>Luminosity: ${luminosity}</div>
+		`.trim();
 	}
 
 	/*
