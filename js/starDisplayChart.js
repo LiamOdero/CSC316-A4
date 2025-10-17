@@ -15,7 +15,7 @@ class StarDisplayChart {
 constructor(parentElement, data) {
     this.parentElement = parentElement;
     this.data = data;
-    this.displayData = [];
+    this.displayData =data;
 	this.get_pos();
 
 	this.colours = ["#FF2400", "#FFFFFF", "#0000FF"]
@@ -97,42 +97,7 @@ constructor(parentElement, data) {
 						   .attr("transform", "translate(0, -10)")
 						   .attr("opacity", 0.5);
 
-        vis.wrangleData();
-		
-		let circles = vis.svg.selectAll("circle")
-			.data(vis.data)
-			.enter()
-			.append("circle");      
-
-		circles
-			.attr("cx", function(d) {
-				return vis.x(d.x_pos); 
-			})
-			.attr("cy", function(d) {
-				return vis.y(d.y_pos); 
-			})
-			.attr("r", function(d) {
-				return vis.r(d.rad)
-			})
-			.attr("fill", function(d) {
-				return vis.colorScale(d.temp)	
-			})
-			.on("mouseenter", (event, d) => {
-				showTooltip(vis.getTooltipContent(d), event);
-				d3.select(event.currentTarget)
-					.attr("stroke", "#ffffff")
-					.attr("stroke-width", 1.5);
-			})
-			.on("mousemove", (event) => {
-				moveTooltip(event);
-			})
-			.on("mouseleave", (event) => {
-				hideTooltip();
-				d3.select(event.currentTarget)
-					.attr("stroke", null)
-					.attr("stroke-width", null);
-			});
-		
+        vis.updateVis();
 	}
 
 	get_pos()	{
@@ -154,10 +119,6 @@ constructor(parentElement, data) {
 		}
 	}
 
-	get_colour()	{
-
-	}
-
 	getTooltipContent(d) {
 		const formatInteger = d3.format(",.0f");
 		const formatSI = d3.format(".2s");
@@ -177,17 +138,6 @@ constructor(parentElement, data) {
 		`.trim();
 	}
 
-	/*
- 	* Data wrangling
- 	*/
-	wrangleData(){
-		let vis = this;
-        
-        //vis.displayData = ....;
-
-		vis.updateVis();
-	}
-
 	/**
 	 * Filters the displayed data
 	 */
@@ -205,13 +155,12 @@ constructor(parentElement, data) {
 		vis.x.domain(xDomain);
 		vis.y.domain(yDomain);
 		
+		let inRangeData = vis.data.filter((e) =>	{
+			return xDomain[0] <= e.x_pos && e.x_pos <= xDomain[1] && yDomain[0] <= e.y_pos && e.y_pos <= yDomain[1]  
+		})
+		vis.r.domain(d3.extent(inRangeData, d => d.rad))
 		
-		vis.svg.selectAll("circle")
-			.transition() // added transition so the circles move whenever the brush changes
-			.duration(750)
-			.attr("cx", d => vis.x(d.x_pos))
-			.attr("cy", d => vis.y(d.y_pos));
-		
+		vis.displayData = inRangeData
 		// axis update
 		vis.updateVis();
 	}
@@ -230,6 +179,43 @@ constructor(parentElement, data) {
  	*/
 	updateVis(){
 		let vis = this;
+
+		let circles = vis.svg.selectAll("circle")
+			.data(vis.displayData);      
+
+		circles.enter().append("circle")
+		.merge(circles)
+			.attr("fill", function(d) {
+				return vis.colorScale(d.temp)	
+			})
+			.on("mouseenter", (event, d) => {
+				showTooltip(vis.getTooltipContent(d), event);
+				d3.select(event.currentTarget)
+					.attr("stroke", "#ffffff")
+					.attr("stroke-width", 1.5);
+			})
+			.on("mousemove", (event) => {
+				moveTooltip(event);
+			})
+			.on("mouseleave", (event) => {
+				hideTooltip();
+				d3.select(event.currentTarget)
+					.attr("stroke", null)
+					.attr("stroke-width", null);
+			})
+			.transition() // added transition so the circles move whenever the brush changes
+			.duration(750)
+			.attr("cx", function(d) {
+				return vis.x(d.x_pos); 
+			})
+			.attr("cy", function(d) {
+				return vis.y(d.y_pos); 
+			})
+			.attr("r", function(d) {
+				return vis.r(d.rad)
+			});
+		circles.exit().remove()
+
 		vis.svg.select(".x-axis").call(vis.xAxis);
 		vis.svg.select(".y-axis").call(vis.yAxis);
 	}
