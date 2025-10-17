@@ -58,8 +58,8 @@ class Minimap {
 			.attr("cx", d => vis.x(d.x_pos))
 			.attr("cy", d => vis.y(d.y_pos))
 			.attr("r", d => vis.r(d.rad))
-			.attr("fill", function(d) {
-				return vis.colorScale(d.temp)	
+			.attr("fill", d => {
+				return vis._mainChart.colorScale(d.temp);
 			})
 			.attr("opacity", 1);
 

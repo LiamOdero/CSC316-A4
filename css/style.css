@@ -53,13 +53,13 @@ h2 {
 .brush .selection {
   stroke: #000000;
   stroke-width: 0.5px;
-  fill: rgba(76, 175, 80, 0.2);
+  fill: rgba(255, 211, 105, 0.2);
   shape-rendering: crispEdges;
 }
 
 .brush .handle {
-  fill: #000000;
-  stroke: #000000;
+  fill: rgba(166, 124, 50, 0.9);
+  stroke: rgba(166, 124, 50, 0.9);
 }
 
 #timeline {
