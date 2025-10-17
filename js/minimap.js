@@ -82,4 +82,33 @@ class Minimap {
 			.attr("class", "brush")
 			.call(vis.brush);
 	}
+
+	/**
+	 * resets the brush to the original domain
+	 */
+	resetBrush() {
+		let vis = this;
+		vis._mainChart.resetDomain();
+		
+		// remove the brush on the minimap
+		vis.brushGroup.call(vis.brush.move, null);
+	}
+
+	/**
+	 * set the brush to show the full extent of all data
+	 */
+	setFullExtent() {
+		let vis = this;
+		const chartData = vis._mainChart.data;
+		const maxX = d3.extent(chartData, d => d.x_pos);
+		const maxY = d3.extent(chartData, d => d.y_pos);
+		
+		vis._mainChart.updateDomain(maxX, maxY);
+		
+		const brushSelection = [
+			[0, 0],
+			[vis.width, vis.height]
+		];
+		vis.brushGroup.call(vis.brush.move, brushSelection);
+	}
 }

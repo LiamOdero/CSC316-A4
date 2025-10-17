@@ -23,6 +23,14 @@ function loadData() {
 		
 		minimap = new Minimap("timeline", data.years, areachart)
 		minimap.initVis();
+
+		d3.select("#reset-brush-btn").on("click", () => {
+			minimap.resetBrush();
+		});
+
+		d3.select("#full-extent-btn").on("click", () => {
+			minimap.setFullExtent();
+		});
     });
 
 }
