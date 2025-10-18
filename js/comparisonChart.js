@@ -1,23 +1,26 @@
 
 /*
- * StarDisplayChart - ES6 Class
+ * ComparisonChart - ES6 Class
  * @param  parentElement 	-- the HTML element in which to draw the visualization
  * @param  data             -- the data the that's provided initially
  * @param  displayData      -- the data that will be used finally (which might vary based on the selection)
- *
- * @param  focus            -- a switch that indicates the current mode (focus or stacked overview)
- * @param  selectedIndex    -- a global 'variable' inside the class that keeps track of the index of the selected area
  */
 
-class StarDisplayChart {
+class ComparisonChart {
 
 // constructor method to initialize StarDisplayChart object
-constructor(parentElement, data, comparison) {
+constructor(parentElement, textElement) {
     this.parentElement = parentElement;
-    this.data = data;
-    this.displayData =data;
-	this.get_pos();
-	this.comparison = comparison
+	this.textElement = textElement
+    this.data = [{name: "Earth", 
+						dist: 0, 
+						lum: NaN, 
+						rad:  6378,
+						temp: 288,
+						x_pos: 0,
+						y_pos: -50}];
+
+    this.displayData = []
 	this.colours = ["#ff3300", "#ffa148", "#fff9fb", "#c8d5ff", "#9bbcff"]
 
 	// Scale defined via http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html 
@@ -39,16 +42,15 @@ constructor(parentElement, data, comparison) {
 		vis.width = document.getElementById(vis.parentElement).getBoundingClientRect().width - vis.margin.left - vis.margin.right;
 		vis.height = document.getElementById(vis.parentElement).getBoundingClientRect().height - vis.margin.top - vis.margin.bottom;
 
-		// Store original domain for reset
-		vis.originalXDomain = d3.extent(vis.data, d => d.x_pos);
-		vis.originalYDomain = d3.extent(vis.data, d => d.y_pos);
-
 		// SVG drawing area
 		vis.svg = d3.select("#" + vis.parentElement).append("svg")
 			.attr("width", vis.width + vis.margin.left + vis.margin.right)
 			.attr("height", vis.height + vis.margin.top + vis.margin.bottom)
 			.append("g")
 			.attr("transform", "translate(" + vis.margin.left + "," + vis.margin.top + ")");
+
+		vis.text = d3.select('#' + vis.textElement)
+		vis.text.text("Highlight a star:")
 
 		// Scales and axes
 
@@ -63,61 +65,26 @@ constructor(parentElement, data, comparison) {
 			.domain(d3.extent(vis.data, d => d.y_pos));
 
 		vis.r = d3.scaleLinear()
-			.range([0, vis.width / 90])
+			.range([0, vis.width / 2])
 			.domain(d3.extent(vis.data, d => d.rad));
 
-		vis.xAxis = d3.axisBottom()
-			.scale(vis.x)
-			.ticks(3)
-
-		vis.yAxis = d3.axisLeft()
-			.scale(vis.y)
-			.ticks(3);
-
-		let xAxisGroup = vis.svg.append("g")
+		vis.svg.append("g")
 			.attr("class", "x-axis axis")
 			.attr("transform", "translate(0," + vis.y(0) + ")");
 
-		xAxisGroup.append("text")    
-						   .attr("class", "axis-title")
-						   .attr("text-anchor", "middle")
-						   .attr("fill", "white")
-						   .text("Distance from Earth (Light Years)")
-						   .attr("transform", "translate(50, -10)")
-						   .attr("opacity", 0.5);
+		this.updateVis();
+	}
+	highlightStar(star)	{
+		this.displayData = [star];
+		this.text.text("Click on star below to compare to Earth")
+		this.r.domain([0, star.rad])
 
-		let yAxisGroup = vis.svg.append("g")
-			.attr("class", "y-axis axis")
-			.attr("transform", "translate("+ vis.x(0)  + ", 0)");
-
-		yAxisGroup.append("text")    
-						   .attr("class", "axis-title")
-						   .attr("text-anchor", "middle")
-						   .attr("fill", "white")
-						   .text("Distance from Earth (Light Years)")
-						   .attr("transform", "translate(0, -10)")
-						   .attr("opacity", 0.5);
-
-        vis.updateVis();
+		this.updateVis();
 	}
 
-	get_pos()	{
-		// For each data point, defines their position on the chart using an offset
-		for (let i = 0; i < this.data.length; i++)	{
-
-			// Randomly determining x and y positions while keeping distance from center
-			// TODO: seeding, for now any filters should just apply on the base data, never change it though
-
-			let x_proportion = Math.random()
-			this.data[i].x_pos = x_proportion * this.data[i].dist * -1;
-			let reflect = Math.random();
-
-
-			this.data[i].y_pos = Math.sqrt(this.data[i].dist ** 2 - this.data[i].x_pos ** 2)
-			if (reflect < 0.5)	{
-				this.data[i].y_pos *= -1
-			}	
-		}
+	highlightEarth()	{
+		this.displayData = this.data
+		this.updateVis();
 	}
 
 	getTooltipContent(d) {
@@ -130,8 +97,6 @@ constructor(parentElement, data, comparison) {
 		const temperature = Number.isFinite(d.temp) ? `${formatInteger(d.temp)} K` : "Unknown";
 		const luminosity = Number.isFinite(d.lum) ? `${formatSI(d.lum)} W` : "Unknown";
 
-		this.comparison.highlightStar(d)
-
 		return `
 			<div><strong>${name}</strong></div>
 			<div>Distance: ${distance}</div>
@@ -140,40 +105,16 @@ constructor(parentElement, data, comparison) {
 			<div>Luminosity: ${luminosity}</div>
 		`.trim();
 	}
-
-	/**
-	 * Filters the displayed data
-	 */
-	filterDisplay()	{
-		this.updateVis()
-	}
-
-	/**
-	 * Update the chart domain based on brush selection
-	 */
-	updateDomain(xDomain, yDomain) {
-		let vis = this;
-		
-		// scales are updated to the new domain
-		vis.x.domain(xDomain);
-		vis.y.domain(yDomain);
-		
-		let inRangeData = vis.data.filter((e) =>	{
-			return xDomain[0] <= e.x_pos && e.x_pos <= xDomain[1] && yDomain[0] <= e.y_pos && e.y_pos <= yDomain[1]  
-		})
-		vis.r.domain(d3.extent(inRangeData, d => d.rad))
-		
-		vis.displayData = inRangeData
-		// axis update
-		vis.updateVis();
-	}
-
 	/**
 	 * Reset to original view
 	 */
 	resetDomain() {
 		let vis = this;
-		vis.updateDomain(vis.originalXDomain, vis.originalYDomain);
+		vis.displayData = vis.data;
+
+		vis.x.domain(d3.extent(vis.data, d => d.x_pos));
+		vis.y.domain(d3.extent(vis.data, d => d.y_pos));
+		vis.r.domain(d3.extent(vis.data, d => d.r));
 	}
 
 	/*
@@ -183,13 +124,17 @@ constructor(parentElement, data, comparison) {
 	updateVis(){
 		let vis = this;
 
-		let circles = vis.svg.selectAll("circle")
+		let circles = vis.svg.selectAll("circle")	
 			.data(vis.displayData);      
-
 		circles.enter().append("circle")
+
 		.merge(circles)
 			.attr("fill", function(d) {
-				return vis.colorScale(d.temp)	
+				if (d.name === "Earth")	{
+					return "#0000A0"
+				}	else	{
+					return vis.colorScale(d.temp)	
+				}
 			})
 			.on("mouseenter", (event, d) => {
 				showTooltip(vis.getTooltipContent(d), event);
@@ -206,6 +151,9 @@ constructor(parentElement, data, comparison) {
 					.attr("stroke", null)
 					.attr("stroke-width", null);
 			})
+			.on("click", (e)	=>	{
+				vis.highlightEarth();
+			})
 			.transition() // added transition so the circles move whenever the brush changes
 			.duration(750)
 			.attr("cx", function(d) {
@@ -218,8 +166,5 @@ constructor(parentElement, data, comparison) {
 				return vis.r(d.rad)
 			});
 		circles.exit().remove()
-
-		vis.svg.select(".x-axis").call(vis.xAxis);
-		vis.svg.select(".y-axis").call(vis.yAxis);
 	}
 }
