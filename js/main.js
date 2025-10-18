@@ -3,7 +3,7 @@
 let areachart, timeline;
 let data;
 
-let RADIUS_EARTH = 6378;
+let RADIUS_SUN= 696340;
 let SUN_LUMINOSITY = 3.83e26
 
 // Start application by loading the data
@@ -17,8 +17,10 @@ function loadData() {
 		console.log(data_cleaned)
         console.log('data loaded ')
 
-		areachart = new StarDisplayChart("stacked-area-chart", data_cleaned);
+		compareChart = new ComparisonChart("star-comparison", "highlight-text")
+		compareChart.initVis();
 
+		areachart = new StarDisplayChart("stacked-area-chart", data_cleaned, compareChart);
 		areachart.initVis();
 		
 		minimap = new Minimap("timeline", data.years, areachart)
@@ -32,7 +34,6 @@ function loadData() {
 			minimap.setFullExtent();
 		});
     });
-
 }
 
 function prepareData(data){
@@ -41,7 +42,7 @@ function prepareData(data){
 		data_cleansed.push({name: e.Source, 
 							dist: +e.Dist, 
 							lum: (e["Lum-Flame"]) ? + e["Lum-Flame"] * SUN_LUMINOSITY : NaN, 
-							rad: +e.Rad * RADIUS_EARTH,
+							rad: +e.Rad * RADIUS_SUN,
 							temp: +e.Teff})
 	});
 
