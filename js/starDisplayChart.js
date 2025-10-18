@@ -183,8 +183,6 @@ constructor(parentElement, data, comparison) {
 	updateVis(){
 		let vis = this;
 
-		vis.comparison.setRad(d3.extent(vis.displayData, d => d.rad)[1])
-
 		let circles = vis.svg.selectAll("circle")
 			.data(vis.displayData);      
 

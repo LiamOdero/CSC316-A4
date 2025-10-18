@@ -74,18 +74,11 @@ constructor(parentElement, textElement) {
 
 		this.updateVis();
 	}
-
-	setRad(max)	{
-		this.r.domain([0, max]);
-		this.displayData = [];
-		this.text.text("Highlight a star:")
-
-		this.updateVis();
-	}
-
 	highlightStar(star)	{
 		this.displayData = [star];
 		this.text.text("Click on star below to compare to Earth")
+		this.r.domain([0, star.rad])
+
 		this.updateVis();
 	}
 
